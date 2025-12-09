@@ -13,6 +13,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='usuario',
             name='tipo_usuario',
-            field=models.CharField(choices=[('administrador', 'Administrador'), ('bodeguero', 'Bodeguero'), ('invitado', 'Invitado')], default='invitado', max_length=15),
+            field=models.CharField(
+                choices=[('administrador', 'Administrador'),
+                        ('bodeguero', 'Bodeguero'), 
+                        ('supervisor', 'Supervisor')], default='invitado', max_length=15),
         ),
     ]

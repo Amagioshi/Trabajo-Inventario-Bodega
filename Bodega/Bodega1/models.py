@@ -6,7 +6,7 @@ class Usuario(AbstractUser):
     TIPO_USUARIO = [
         ('administrador', 'Administrador'),
         ('bodeguero', 'Bodeguero'),
-        ('invitado', 'Invitado'),
+        ('supervisor', 'Supervisor'),
     ]
     
     tipo_usuario = models.CharField(max_length=15, choices=TIPO_USUARIO, default='invitado')
