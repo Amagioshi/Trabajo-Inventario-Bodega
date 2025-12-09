@@ -61,24 +61,15 @@
     {% endif %}
 
     <!-- MENU PARA INVITADOS -->
-    {% if user.tipo_usuario == 'invitado' %}
-    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <h3>Panel de Invitado</h3>
-        <div class="menu">
-            <a href="/productos/" style="background: #007bff;">Ver Productos</a>
-            <a href="/movimientos/historial/" style="background: #17a2b8;">Ver Historial</a>
-        </div>
-        <p style="color: #6c757d; margin-top: 10px;">Nota: Solo puedes visualizar información, no modificar.</p>
+    {% if user.tipo_usuario == 'invitado' or user.tipo_usuario == 'supervisor' %}
+<div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+    <h3>Panel de Supervisor</h3>
+    <div class="menu">
+        <a href="{% url 'ver_productos' %}" style="background: #007bff;">Ver Productos</a>
+        <a href="{% url 'historial_movimientos' %}" style="background: #17a2b8;">Ver Historial</a>
     </div>
-    {% endif %}
-
-    <div>
-        <h2>Estado del sistema:</h2>
-        <ul>
-            <li>Usuario: {{ user.username }}</li>
-            <li>Rol: {{ user.get_tipo_usuario_display }}</li>
-            <li>Sesión activa</li>
-        </ul>
-    </div>
-</body>
-</html>
+    <p style="color: #6c757d; margin-top: 10px;">
+        <i class="fas fa-eye"></i> Rol de supervisión: Solo puedes visualizar información.
+    </p>
+</div>
+{% endif %}

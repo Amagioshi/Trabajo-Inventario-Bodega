@@ -1,3 +1,3 @@
 admin,Amagioshi@,administrador
 bodeguero,clave123,bodeguero
-invitado,clave123,invitado
+invitado,clave123,supervisor
