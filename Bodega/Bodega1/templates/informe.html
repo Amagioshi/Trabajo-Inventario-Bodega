@@ -224,7 +224,7 @@
                             </span>
                             <span class="badge bg-warning rounded-pill">
                                 {% if total_productos > 0 %}
-                                {{ porcentaje_stock_bajo }}%
+                                {{ (productos_stock_bajo|length / total_productos * 100)|floatformat:1 }}%
                                 {% else %}0%{% endif %}
                             </span>
                         </li>
@@ -285,4 +285,19 @@
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar estadísticas dinámicas
+    const totalProductos = {{ total_productos }};
+    const productosStockBajo = {{ productos_stock_bajo|length }};
+    
+    if (totalProductos > 0) {
+        const porcentajeBajo = (productosStockBajo / totalProductos * 100).toFixed(1);
+        const porcentajeElement = document.querySelector('.badge.bg-warning.rounded-pill:last-child');
+        if (porcentajeElement) {
+            porcentajeElement.textContent = porcentajeBajo + '%';
+        }
+    }
+});
+</script>
 {% endblock %}

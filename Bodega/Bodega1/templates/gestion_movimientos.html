@@ -1,99 +1,208 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Registro de Movimientos</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
-        .header { margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-        .tipo-buttons { display: flex; gap: 10px; margin: 10px 0; }
-        .tipo-btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .ingreso { background: #28a745; color: white; }
-        .egreso { background: #dc3545; color: white; }
-        .tipo-btn.active { border: 3px solid #007bff; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Registro de Movimientos</h1>
-        <a href="/">← Volver al Dashboard</a> | 
-        <a href="/movimientos/historial/">Ver Historial</a>
-    </div>
+{% extends 'base.html' %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div style="color: {% if message.tags == 'error' %}red{% elif message.tags == 'info' %}blue{% else %}green{% endif %}; 
-                         margin: 10px 0; padding: 10px; border: 1px solid {% if message.tags == 'error' %}red{% elif message.tags == 'info' %}blue{% else %}green{% endif %};">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
+{% block title %}Registro de Movimientos - Sistema Inventario{% endblock %}
 
-    <div class="section">
-        <h2>Registrar Nuevo Movimiento</h2>
-        <form method="post" id="movimientoForm">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label>Producto:</label>
-                <select name="producto_id" required style="width: 100%; padding: 8px;">
-                    <option value="">Seleccione un producto</option>
-                    {% for producto in productos %}
-                    <option value="{{ producto.id }}">
-                        {{ producto.nombre }} (Stock: {{ producto.stock }})
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Tipo de Movimiento:</label>
-                <div class="tipo-buttons">
-                    <button type="button" class="tipo-btn ingreso active" data-tipo="ingreso">
-                        Ingreso
-                    </button>
-                    <button type="button" class="tipo-btn egreso" data-tipo="egreso">
-                         Egreso
-                    </button>
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-arrow-left-right"></i> Registro de Movimientos
+                    </h4>
                 </div>
-                <input type="hidden" name="tipo" id="tipoInput" value="ingreso" required>
+                <div class="card-body">
+                    <nav class="nav nav-pills nav-fill mb-4">
+                        <a class="nav-link active" href="{% url 'gestion_movimientos' %}">
+                            <i class="bi bi-plus-circle"></i> Registrar Movimiento
+                        </a>
+                        <a class="nav-link" href="{% url 'historial_movimientos' %}">
+                            <i class="bi bi-clock-history"></i> Ver Historial
+                        </a>
+                    </nav>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label>Cantidad:</label>
-                <input type="number" name="cantidad" min="1" required 
-                       style="width: 200px; padding: 8px;" placeholder="Cantidad">
-            </div>
-
-            <div class="form-group">
-                <label>Motivo:</label>
-                <input type="text" name="motivo" required 
-                       style="width: 100%; padding: 8px;" placeholder="Ej: Compra proveedor, Venta cliente, Ajuste inventario">
-            </div>
-
-            <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none;">
-                Registrar Movimiento
-            </button>
-        </form>
+        </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tipoButtons = document.querySelectorAll('.tipo-btn');
-            const tipoInput = document.getElementById('tipoInput');
-            
-            tipoButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // Remover clase active de todos
-                    tipoButtons.forEach(btn => btn.classList.remove('active'));
-                    // Agregar clase active al clickeado
-                    this.classList.add('active');
-                    // Actualizar input hidden
-                    tipoInput.value = this.getAttribute('data-tipo');
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Nuevo Movimiento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="movimientoForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="producto_id" class="form-label">
+                                    <i class="bi bi-box"></i> Producto
+                                </label>
+                                <select class="form-select" 
+                                        id="producto_id" 
+                                        name="producto_id" 
+                                        required>
+                                    <option value="">Seleccione un producto</option>
+                                    {% for producto in productos %}
+                                    <option value="{{ producto.id }}" data-stock="{{ producto.stock }}">
+                                        {{ producto.nombre }} (Stock: {{ producto.stock }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text" id="stockInfo">
+                                    Seleccione un producto para ver stock disponible.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-arrow-left-right"></i> Tipo de Movimiento
+                                </label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" 
+                                           class="btn-check" 
+                                           name="tipo" 
+                                           id="ingreso" 
+                                           value="ingreso" 
+                                           autocomplete="off" 
+                                           checked>
+                                    <label class="btn btn-outline-success" for="ingreso">
+                                        <i class="bi bi-arrow-down-circle"></i> Ingreso
+                                    </label>
+                                    
+                                    <input type="radio" 
+                                           class="btn-check" 
+                                           name="tipo" 
+                                           id="egreso" 
+                                           value="egreso" 
+                                           autocomplete="off">
+                                    <label class="btn btn-outline-danger" for="egreso">
+                                        <i class="bi bi-arrow-up-circle"></i> Egreso
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="cantidad" class="form-label">
+                                    <i class="bi bi-123"></i> Cantidad
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="cantidad" 
+                                       name="cantidad" 
+                                       min="1" 
+                                       required
+                                       placeholder="Ej: 50">
+                            </div>
+                            
+                            <div class="col-md-8 mb-3">
+                                <label for="motivo" class="form-label">
+                                    <i class="bi bi-chat-text"></i> Motivo
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="motivo" 
+                                       name="motivo" 
+                                       placeholder="Ej: Compra proveedor, Venta cliente, Ajuste inventario"
+                                       required
+                                       minlength="5"
+                                       maxlength="200">
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning" id="egresoWarning" style="display: none;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Advertencia:</strong> El stock disponible es insuficiente para este egreso.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle"></i> Registrar Movimiento
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Información del Movimiento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary">
+                        <i class="bi bi-lightbulb"></i> <strong>Tipos de movimiento:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong class="text-success">Ingreso:</strong> Entrada de productos al inventario</li>
+                            <li><strong class="text-danger">Egreso:</strong> Salida de productos del inventario</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-secondary">
+                        <h6><i class="bi bi-shield-check"></i> Validaciones automáticas:</h6>
+                        <ul class="mb-0">
+                            <li>Stock suficiente para egresos</li>
+                            <li>Producto existente y activo</li>
+                            <li>Cantidad mayor a 0</li>
+                            <li>Motivo mínimo 5 caracteres</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const productoSelect = document.getElementById('producto_id');
+    const stockInfo = document.getElementById('stockInfo');
+    const cantidadInput = document.getElementById('cantidad');
+    const egresoRadio = document.getElementById('egreso');
+    const ingresoRadio = document.getElementById('ingreso');
+    const egresoWarning = document.getElementById('egresoWarning');
+    
+    function updateStockInfo() {
+        const selectedOption = productoSelect.options[productoSelect.selectedIndex];
+        const stock = selectedOption.getAttribute('data-stock');
+        
+        if (stock) {
+            stockInfo.innerHTML = `<i class="bi bi-boxes"></i> Stock disponible: <strong>${stock}</strong> unidades`;
+            checkStock();
+        } else {
+            stockInfo.innerHTML = 'Seleccione un producto para ver stock disponible.';
+        }
+    }
+    
+    function checkStock() {
+        const selectedOption = productoSelect.options[productoSelect.selectedIndex];
+        const stock = parseInt(selectedOption.getAttribute('data-stock') || 0);
+        const cantidad = parseInt(cantidadInput.value || 0);
+        
+        if (egresoRadio.checked && cantidad > stock) {
+            egresoWarning.style.display = 'block';
+            return false;
+        } else {
+            egresoWarning.style.display = 'none';
+            return true;
+        }
+    }
+    
+    productoSelect.addEventListener('change', updateStockInfo);
+    cantidadInput.addEventListener('input', checkStock);
+    egresoRadio.addEventListener('change', checkStock);
+    ingresoRadio.addEventListener('change', checkStock);
+    
+    // Inicializar
+    updateStockInfo();
+});
+</script>
+{% endblock %}

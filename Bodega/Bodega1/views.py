@@ -275,11 +275,15 @@ def informes(request):
         # Productos con stock bajo (menos de 10 unidades)
         productos_stock_bajo = [p for p in productos if p.stock < 10]
         
+        # Calcular porcentaje de stock bajo
+        porcentaje_stock_bajo = (len(productos_stock_bajo) / total_productos * 100) if total_productos > 0 else 0
+        
         return render(request, 'informes.html', {
             'total_productos': total_productos,
             'total_stock': total_stock,
             'valor_inventario': valor_inventario,
             'productos_stock_bajo': productos_stock_bajo,
+            'porcentaje_stock_bajo': round(porcentaje_stock_bajo, 1),
         })
         
     except Exception as e:
@@ -289,6 +293,7 @@ def informes(request):
             'total_stock': 0,
             'valor_inventario': 0,
             'productos_stock_bajo': [],
+            'porcentaje_stock_bajo': 0,
         })
     finally:
         db.cerrar_conexion()

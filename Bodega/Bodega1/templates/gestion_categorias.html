@@ -1,67 +1,94 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Gestión de Categorías</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
-        .header { margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Gestión de Categorías</h1>
-        <a href="/">← Volver al Dashboard</a>
-    </div>
+{% extends 'base.html' %}
 
-    {% if messages %}
-        {% for message in messages %}
-            {% if message.tags == 'error' %}
-            <div style="color: red; margin: 10px 0;">
-                {{ message }}
-            </div>
-            {% else %}
-            <div style="color: green; margin: 10px 0;">
-                {{ message }}
-            </div>
-            {% endif %}
-        {% endfor %}
-    {% endif %}
+{% block title %}Gestión de Categorías - Sistema Inventario{% endblock %}
 
-    <h2>Crear Nueva Categoría</h2>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <input type="text" name="nombre" placeholder="Nombre de la categoría" required style="width: 300px; padding: 8px;">
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-tags"></i> Gestión de Categorías
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-plus-circle"></i> Nueva Categoría
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label for="nombre" class="form-label">
+                                                <i class="bi bi-fonts"></i> Nombre de la categoría
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="nombre" 
+                                                   name="nombre" 
+                                                   placeholder="Ej: Bebidas, Snacks, Limpieza"
+                                                   required
+                                                   minlength="2"
+                                                   maxlength="50">
+                                            <div class="form-text">
+                                                Mínimo 2 caracteres, no solo números, al menos una letra.
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-check-circle"></i> Crear Categoría
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-list-ul"></i> Categorías Existentes
+                                        <span class="badge bg-light text-dark ms-2">{{ categorias|length }}</span>
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if categorias %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th><i class="bi bi-hash"></i> ID</th>
+                                                    <th><i class="bi bi-fonts"></i> Nombre</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for categoria in categorias %}
+                                                <tr>
+                                                    <td><span class="badge bg-secondary">{{ categoria.id }}</span></td>
+                                                    <td>{{ categoria.nombre }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="bi bi-inbox display-4 text-muted"></i>
+                                        <p class="text-muted mt-3">No hay categorías registradas.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <button type="submit" style="padding: 8px 15px; background: #28a745; color: white; border: none;">
-            Crear Categoría
-        </button>
-    </form>
-
-    <h2>Categorías Existentes</h2>
-    {% if categorias %}
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for categoria in categorias %}
-                <tr>
-                    <td>{{ categoria.id }}</td>
-                    <td>{{ categoria.nombre }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No hay categorías registradas.</p>
-    {% endif %}
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

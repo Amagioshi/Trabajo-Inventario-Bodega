@@ -1,63 +1,234 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Ver Productos</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 20px auto; padding: 20px; }
-        .header { margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .activo { color: green; font-weight: bold; }
-        .inactivo { color: red; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Productos en Inventario</h1>
-        <a href="/">← Volver al Dashboard</a>
-        {% if user.tipo_usuario == 'administrador' %}
-        | <a href="/productos/">Crear Nuevo Producto</a>
-        {% endif %}
-    </div>
+{% extends 'base.html' %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %}; margin: 10px 0;">
-                {{ message }}
+{% block title %}Ver Productos - Sistema Inventario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-eye"></i> Productos en Inventario
+                        {% if user.tipo_usuario == 'administrador' %}
+                        <a href="{% url 'gestion_productos' %}" class="btn btn-light btn-sm float-end">
+                            <i class="bi bi-plus-circle"></i> Nuevo Producto
+                        </a>
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="searchInput" 
+                                       placeholder="Buscar producto...">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="filterStatus">
+                                <option value="">Todos los estados</option>
+                                <option value="activo">Activos</option>
+                                <option value="inactivo">Inactivos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-text text-end">
+                                Mostrando <span id="productCount">{{ productos|length }}</span> productos
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if productos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="productosTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="bi bi-hash"></i> ID</th>
+                                    <th><i class="bi bi-fonts"></i> Nombre</th>
+                                    <th><i class="bi bi-currency-dollar"></i> Precio</th>
+                                    <th><i class="bi bi-boxes"></i> Stock</th>
+                                    {% if user.tipo_usuario != 'supervisor' %}
+                                    <th><i class="bi bi-tag"></i> Categoría ID</th>
+                                    <th><i class="bi bi-circle-fill"></i> Estado</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for producto in productos %}
+                                <tr class="product-row" 
+                                    data-status="{% if producto.activo %}activo{% else %}inactivo{% endif %}">
+                                    <td><span class="badge bg-secondary">{{ producto.id }}</span></td>
+                                    <td>{{ producto.nombre }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            ${{ producto.precio|floatformat:2 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if producto.stock < 10 %}bg-danger
+                                                         {% elif producto.stock < 50 %}bg-warning
+                                                         {% else %}bg-success{% endif %}">
+                                            {{ producto.stock }}
+                                            {% if producto.stock < 10 %}
+                                            <i class="bi bi-exclamation-triangle"></i>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    {% if user.tipo_usuario != 'supervisor' %}
+                                    <td><span class="badge bg-info">{{ producto.categoria_id }}</span></td>
+                                    <td>
+                                        {% if producto.activo %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Activo
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle"></i> Inactivo
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-4 text-muted"></i>
+                        <p class="text-muted mt-3">No hay productos registrados.</p>
+                        {% if user.tipo_usuario == 'administrador' %}
+                        <a href="{% url 'gestion_productos' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i> Crear Primer Producto
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-        {% endfor %}
+        </div>
+    </div>
+    
+    {% if user.tipo_usuario != 'supervisor' %}
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Productos Activos
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ productos|length|default:0 }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Stock Bajo (< 10)
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-warning">
+                        {% with bajo=productos|length|default:0 %}
+                        {{ bajo }}
+                        {% endwith %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-boxes"></i> Total Stock
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-info">
+                        {% with total=0 %}
+                        {{ total }}
+                        {% endwith %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
     {% endif %}
+</div>
 
-    {% if productos %}
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Categoría ID</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                <tr>
-                    <td>{{ producto.id }}</td>
-                    <td>{{ producto.nombre }}</td>
-                    <td>${{ producto.precio }}</td>
-                    <td>{{ producto.stock }}</td>
-                    <td>{{ producto.categoria_id }}</td>
-                    <td class="{% if producto.activo %}activo{% else %}inactivo{% endif %}">
-                        {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No hay productos registrados.</p>
-    {% endif %}
-</body>
-</html>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterStatus = document.getElementById('filterStatus');
+    const productRows = document.querySelectorAll('.product-row');
+    const productCount = document.getElementById('productCount');
+    
+    function filterProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusFilter = filterStatus.value;
+        let visibleCount = 0;
+        
+        productRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const status = row.getAttribute('data-status');
+            
+            const matchesSearch = text.includes(searchTerm);
+            const matchesStatus = !statusFilter || status === statusFilter;
+            
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        productCount.textContent = visibleCount;
+    }
+    
+    searchInput.addEventListener('input', filterProducts);
+    filterStatus.addEventListener('change', filterProducts);
+    
+    // Calcular estadísticas
+    let stockBajo = 0;
+    let totalStock = 0;
+    
+    productRows.forEach(row => {
+        const stockCell = row.cells[3];
+        if (stockCell) {
+            const stockText = stockCell.textContent.match(/\d+/);
+            if (stockText) {
+                const stock = parseInt(stockText[0]);
+                totalStock += stock;
+                
+                if (stock < 10) {
+                    stockBajo++;
+                }
+            }
+        }
+    });
+    
+    // Actualizar contadores si existen
+    const stockBajoElement = document.querySelector('.text-warning');
+    const totalStockElement = document.querySelector('.text-info');
+    
+    if (stockBajoElement) {
+        stockBajoElement.textContent = stockBajo;
+    }
+    if (totalStockElement) {
+        totalStockElement.textContent = totalStock;
+    }
+});
+</script>
+{% endblock %}

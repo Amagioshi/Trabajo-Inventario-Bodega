@@ -1,75 +1,197 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard - Sistema Inventario</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 50px auto; padding: 20px; }
-        .header { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-        .menu { display: flex; gap: 10px; margin: 20px 0; }
-        .menu a { padding: 10px 15px; color: white; text-decoration: none; border-radius: 3px; }
-        .admin-badge { background: #dc3545; }
-        .bodeguero-badge { background: #0d6efd; }
-        .invitado-badge { background: #6c757d; }
-        .role-badge { 
-            display: inline-block; 
-            padding: 3px 10px; 
-            border-radius: 12px; 
-            font-size: 0.8em; 
-            margin-left: 10px; 
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Sistema de Inventario de Bodega</h1>
-        <p>Bienvenido <strong>{{ user.username }}</strong> 
-            <span class="role-badge 
-                {% if user.tipo_usuario == 'administrador' %}admin-badge
-                {% elif user.tipo_usuario == 'bodeguero' %}bodeguero-badge
-                {% else %}invitado-badge{% endif %}">
-                {{ user.get_tipo_usuario_display }}
-            </span>
-        </p>
-        <a href="/logout/">Cerrar Sesión</a>
-    </div>
+{% extends 'base.html' %}
 
-    <!-- MENU PARA ADMINISTRADORES -->
-    {% if user.tipo_usuario == 'administrador' %}
-    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <h3>Panel de Administración</h3>
-        <div class="menu">
-            <a href="/categorias/" style="background: #28a745;">Gestión de Categorías</a>
-            <a href="/productos/" style="background: #28a745;">Gestión de Productos</a>
-            <a href="/movimientos/" style="background: #007bff;">Movimientos</a>
-            <a href="/movimientos/historial/" style="background: #17a2b8;">Historial</a>
-            <a href="/informes/" style="background: #6f42c1;">Informes</a>
+{% block title %}Dashboard - Sistema Inventario{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-speedometer"></i> Panel de Control
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-person"></i> Usuario
+                                </h5>
+                                <p class="card-text display-6">{{ user.username }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-person-badge"></i> Rol
+                                </h5>
+                                <p class="card-text display-6">{{ user.get_tipo_usuario_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="bi bi-check-circle"></i> Estado
+                                </h5>
+                                <p class="card-text display-6">Activo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    {% endif %}
-
-    <!-- MENU PARA BODEGUEROS -->
-    {% if user.tipo_usuario == 'bodeguero' %}
-    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <h3>Panel de Bodeguero</h3>
-        <div class="menu">
-            <a href="/productos/" style="background: #007bff;">Ver Productos</a>
-            <a href="/movimientos/" style="background: #28a745;">Ingresar Productos</a>
-            <a href="/movimientos/" style="background: #ffc107;">Egresar Productos</a>
-            <a href="/movimientos/historial/" style="background: #17a2b8;">Ver Historial</a>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- MENU PARA INVITADOS -->
-    {% if user.tipo_usuario == 'invitado' or user.tipo_usuario == 'supervisor' %}
-<div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-    <h3>Panel de Supervisor</h3>
-    <div class="menu">
-        <a href="{% url 'ver_productos' %}" style="background: #007bff;">Ver Productos</a>
-        <a href="{% url 'historial_movimientos' %}" style="background: #17a2b8;">Ver Historial</a>
-    </div>
-    <p style="color: #6c757d; margin-top: 10px;">
-        <i class="fas fa-eye"></i> Rol de supervisión: Solo puedes visualizar información.
-    </p>
 </div>
-{% endif %}
+
+<!-- Tarjetas de Acceso Rápido según Rol -->
+<div class="row">
+    {% if user.tipo_usuario == 'administrador' %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-tags"></i> Gestión de Categorías
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Crear, editar y eliminar categorías de productos.</p>
+                <a href="{% url 'gestion_categorias' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-box"></i> Gestión de Productos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Administrar productos del inventario con stock inicial.</p>
+                <a href="{% url 'gestion_productos' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up"></i> Informes
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Reportes de stock, valor de inventario y análisis.</p>
+                <a href="{% url 'informes' %}" class="btn btn-info">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% elif user.tipo_usuario == 'bodeguero' %}
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-arrow-down-circle"></i> Ingreso de Productos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Registrar entrada de productos al inventario.</p>
+                <a href="{% url 'gestion_movimientos' %}" class="btn btn-success">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-arrow-up-circle"></i> Egreso de Productos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Registrar salida de productos del inventario.</p>
+                <a href="{% url 'gestion_movimientos' %}" class="btn btn-warning">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% elif user.tipo_usuario == 'supervisor' %}
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-eye"></i> Ver Productos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Consultar productos disponibles en inventario.</p>
+                <a href="{% url 'ver_productos' %}" class="btn btn-info">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Historial
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Revisar movimientos del inventario.</p>
+                <a href="{% url 'historial_movimientos' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-right"></i> Acceder
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Información del Sistema
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="bi bi-check-circle text-success"></i> Sistema funcionando correctamente
+                    </li>
+                    <li class="list-group-item">
+                        <i class="bi bi-database text-primary"></i> Base de datos: SQL Server
+                    </li>
+                    <li class="list-group-item">
+                        <i class="bi bi-shield-check text-info"></i> Autenticación segura por roles
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

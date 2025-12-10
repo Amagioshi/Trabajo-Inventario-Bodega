@@ -1,75 +1,229 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Historial de Movimientos</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 20px auto; padding: 20px; }
-        .header { margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .ingreso { color: #28a745; font-weight: bold; }
-        .egreso { color: #dc3545; font-weight: bold; }
-        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Historial de Movimientos</h1>
-        <a href="/">← Volver al Dashboard</a> | 
-        <a href="/movimientos/">Registrar Movimiento</a>
+{% extends 'base.html' %}
+
+{% block title %}Historial de Movimientos - Sistema Inventario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Historial de Movimientos
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <nav class="nav nav-pills nav-fill mb-4">
+                        <a class="nav-link" href="{% url 'gestion_movimientos' %}">
+                            <i class="bi bi-plus-circle"></i> Registrar Movimiento
+                        </a>
+                        <a class="nav-link active" href="{% url 'historial_movimientos' %}">
+                            <i class="bi bi-clock-history"></i> Ver Historial
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="section">
-        <h2>Filtrar por Producto</h2>
-        <form method="get">
-            <select name="producto_id" style="width: 300px; padding: 8px;">
-                <option value="">Todos los productos</option>
-                {% for producto in productos %}
-                <option value="{{ producto.id }}" 
-                    {% if producto_seleccionado == producto.id|stringformat:"i" %}selected{% endif %}>
-                    {{ producto.nombre }}
-                </option>
-                {% endfor %}
-            </select>
-            <button type="submit" style="padding: 8px 15px; background: #007bff; color: white; border: none;">
-                Filtrar
-            </button>
-        </form>
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-filter"></i> Filtrar por Producto
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-12">
+                            <label for="producto_id" class="form-label">
+                                <i class="bi bi-box"></i> Producto
+                            </label>
+                            <select class="form-select" 
+                                    id="producto_id" 
+                                    name="producto_id">
+                                <option value="">Todos los productos</option>
+                                {% for producto in productos %}
+                                <option value="{{ producto.id }}" 
+                                        {% if producto_seleccionado == producto.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ producto.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                                <a href="{% url 'historial_movimientos' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Limpiar Filtros
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Información del Filtro
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small">
+                        <i class="bi bi-lightbulb"></i> 
+                        {% if producto_seleccionado %}
+                        Mostrando movimientos del producto seleccionado.
+                        {% else %}
+                        Mostrando todos los movimientos del sistema.
+                        {% endif %}
+                    </p>
+                    <div class="alert alert-info small">
+                        <i class="bi bi-exclamation-circle"></i>
+                        Los movimientos se ordenan por fecha (más recientes primero).
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i> Movimientos Registrados
+                        <span class="badge bg-light text-dark ms-2">{{ movimientos|length }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if movimientos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th><i class="bi bi-hash"></i> ID</th>
+                                    <th><i class="bi bi-box"></i> Producto ID</th>
+                                    <th><i class="bi bi-arrow-left-right"></i> Tipo</th>
+                                    <th><i class="bi bi-123"></i> Cantidad</th>
+                                    <th><i class="bi bi-chat-text"></i> Motivo</th>
+                                    <th><i class="bi bi-calendar"></i> Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movimiento in movimientos %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ movimiento.id }}</span></td>
+                                    <td><span class="badge bg-info">{{ movimiento.producto_id }}</span></td>
+                                    <td>
+                                        {% if movimiento.tipo == 'ingreso' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-arrow-down-circle"></i> Ingreso
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-arrow-up-circle"></i> Egreso
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if movimiento.tipo == 'ingreso' %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ movimiento.cantidad }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{ movimiento.motivo|truncatechars:50 }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ movimiento.fecha }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Resumen -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-arrow-down-circle text-success"></i> Ingresos Totales</h6>
+                                    <h4 class="text-success">
+                                        {% with ingresos=0 %}
+                                        {{ ingresos }}
+                                        {% endwith %}
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="bi bi-arrow-up-circle text-danger"></i> Egresos Totales</h6>
+                                    <h4 class="text-danger">
+                                        {% with egresos=0 %}
+                                        {{ egresos }}
+                                        {% endwith %}
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-4 text-muted"></i>
+                        <p class="text-muted mt-3">
+                            {% if producto_seleccionado %}
+                            No hay movimientos registrados para este producto.
+                            {% else %}
+                            No hay movimientos registrados en el sistema.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'gestion_movimientos' %}" class="btn btn-primary mt-3">
+                            <i class="bi bi-plus-circle"></i> Registrar Primer Movimiento
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="section">
-        <h2>Movimientos Registrados</h2>
-        {% if movimientos %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Producto ID</th>
-                        <th>Tipo</th>
-                        <th>Cantidad</th>
-                        <th>Motivo</th>
-                        <th>Fecha</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for movimiento in movimientos %}
-                    <tr>
-                        <td>{{ movimiento.id }}</td>
-                        <td>{{ movimiento.producto_id }}</td>
-                        <td class="{% if movimiento.tipo == 'ingreso' %}ingreso{% else %}egreso{% endif %}">
-                            {{ movimiento.tipo|title }}
-                        </td>
-                        <td>{{ movimiento.cantidad }}</td>
-                        <td>{{ movimiento.motivo }}</td>
-                        <td>{{ movimiento.fecha }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No hay movimientos registrados{% if producto_seleccionado %} para este producto{% endif %}.</p>
-        {% endif %}
-    </div>
-</body>
-</html>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calcular totales
+    let totalIngresos = 0;
+    let totalEgresos = 0;
+    
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const tipoBadge = row.querySelector('.badge.bg-success, .badge.bg-danger');
+        const cantidadSpan = row.querySelector('.badge.bg-success, .badge.bg-danger:nth-child(2)');
+        
+        if (tipoBadge && cantidadSpan) {
+            const tipo = tipoBadge.textContent.includes('Ingreso') ? 'ingreso' : 'egreso';
+            const cantidad = parseInt(cantidadSpan.textContent) || 0;
+            
+            if (tipo === 'ingreso') {
+                totalIngresos += cantidad;
+            } else {
+                totalEgresos += cantidad;
+            }
+        }
+    });
+    
+    // Actualizar totales si existen los elementos
+    const ingresosElement = document.querySelector('.text-success:nth-of-type(2)');
+    const egresosElement = document.querySelector('.text-danger:nth-of-type(2)');
+    
+    if (ingresosElement) {
+        ingresosElement.textContent = totalIngresos;
+    }
+    if (egresosElement) {
+        egresosElement.textContent = totalEgresos;
+    }
+});
+</script>
+{% endblock %}
