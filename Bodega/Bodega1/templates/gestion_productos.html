@@ -51,7 +51,12 @@
                     <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
                     {% endfor %}
                 </select>
-            </div>
+            <div class="form-group">
+    <input type="number" name="stock_inicial"
+           placeholder="Stock inicial"
+           min="0" value="0"
+           style="width: 200px; padding: 8px;">
+</div>
             <button type="submit" style="padding: 8px 15px; background: #28a745; color: white; border: none;">
                 Crear Producto
             </button>

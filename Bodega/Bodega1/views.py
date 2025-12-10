@@ -84,22 +84,84 @@ def gestion_categorias(request):
         repositorio = CategoriaRepositorio(db)
         servicio = CategoriaServicio(repositorio)
         
+        # PRIMERO cargar categorías existentes (siempre)
+        categorias = servicio.listar_categorias()
+        
+        # LUEGO procesar POST (si existe)
         if request.method == 'POST':
             nombre = request.POST.get('nombre')
             try:
                 id_nuevo = servicio.crear_categoria(nombre)
                 messages.success(request, f'Categoría creada con ID: {id_nuevo}')
+                # Recargar categorías después de crear
+                categorias = servicio.listar_categorias()
+            except ValueError as e:
+                messages.error(request, f'Error de validación: {e}')
+                # NO recargar categorías, mantener las que ya cargamos
             except Exception as e:
                 messages.error(request, f'Error al crear categoría: {e}')
+                # NO recargar categorías, mantener las que ya cargamos
         
-        categorias = servicio.listar_categorias()
         return render(request, 'gestion_categorias.html', {
-            'categorias': categorias
+            'categorias': categorias  # Siempre tiene datos
         })
         
     except Exception as e:
         messages.error(request, f'Error de conexión: {e}')
         return render(request, 'gestion_categorias.html', {
+            'categorias': []  # Vacío solo si error de conexión
+        })
+    finally:
+        db.cerrar_conexion()
+
+
+def gestion_productos(request):
+    db = ConexionBD()
+    try:
+        db.conectar()
+        repo_productos = ProductoRepositorio(db)
+        repo_categorias = CategoriaRepositorio(db)
+        servicio = ProductoServicio(repo_productos)
+        
+        # PRIMERO cargar datos existentes
+        categorias = repo_categorias.obtener_todos()
+        productos = servicio.listar_productos()
+        
+        # LUEGO procesar POST
+        if request.method == 'POST':
+            nombre = request.POST.get('nombre')
+            precio = float(request.POST.get('precio'))
+            categoria_id = int(request.POST.get('categoria_id'))
+            stock_inicial = int(request.POST.get('stock_inicial',0))
+               
+
+                # DEBUG: Ver qué está llegando
+            print(f" DEBUG VIEWS: nombre='{nombre}', precio={precio}, categoria_id={categoria_id}, stock_inicial_raw='{request.POST.get('stock_inicial')}', stock_inicial={stock_inicial}")
+            
+
+
+            try:
+                id_nuevo = repo_productos.crear(nombre, precio, categoria_id, stock_inicial)
+
+                messages.success(request, f'Producto creado con ID: {id_nuevo}')
+                # Recargar productos después de crear
+                productos = servicio.listar_productos()
+            except ValueError as e:
+                messages.error(request, f'Error de validación: {e}')
+                # Mantener productos ya cargados
+            except Exception as e:
+                messages.error(request, f'Error al crear producto: {e}')
+                # Mantener productos ya cargados
+        
+        return render(request, 'gestion_productos.html', {
+            'productos': productos,
+            'categorias': categorias
+        })
+        
+    except Exception as e:
+        messages.error(request, f'Error de conexión: {e}')
+        return render(request, 'gestion_productos.html', {
+            'productos': [],
             'categorias': []
         })
     finally:
@@ -125,45 +187,6 @@ def ver_productos(request):
     finally:
         db.cerrar_conexion()
 
-
-
-@puede_crear_productos
-def gestion_productos(request):
-    db = ConexionBD()
-    try:
-        db.conectar()
-        repo_productos = ProductoRepositorio(db)
-        repo_categorias = CategoriaRepositorio(db)
-        servicio = ProductoServicio(repo_productos)
-        
-        # Obtener categorías para el formulario
-        categorias = repo_categorias.obtener_todos()
-        
-        if request.method == 'POST':
-            nombre = request.POST.get('nombre')
-            precio = float(request.POST.get('precio'))
-            categoria_id = int(request.POST.get('categoria_id'))
-            
-            try:
-                id_nuevo = servicio.crear_producto(nombre, precio, categoria_id)
-                messages.success(request, f'Producto creado con ID: {id_nuevo}')
-            except Exception as e:
-                messages.error(request, f'Error al crear producto: {e}')
-        
-        productos = servicio.listar_productos()
-        return render(request, 'gestion_productos.html', {
-            'productos': productos,
-            'categorias': categorias
-        })
-        
-    except Exception as e:
-        messages.error(request, f'Error de conexión: {e}')
-        return render(request, 'gestion_productos.html', {
-            'productos': [],
-            'categorias': []
-        })
-    finally:
-        db.cerrar_conexion()
 
 @bodeguero_required
 def gestion_movimientos(request):

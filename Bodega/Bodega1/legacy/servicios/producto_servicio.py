@@ -9,9 +9,10 @@ class ProductoServicio:
     # Método para crear un nuevo producto
     # Recibe el nombre, precio y el ID de la categoría
     # Devuelve el ID del producto creado
-    def crear_producto(self, nombre: str, precio: float, categoria_id: int) -> int:
+    def crear_producto(self, nombre: str, precio: float, categoria_id: int, stock_inicial: int = 0) -> int:
         # Llamamos al repositorio para crear el producto en la base de datos
-        return self.repositorio.crear(nombre, precio, categoria_id)
+        print(f"DEBUG stock_inicial final: {stock_inicial}")
+        return self.repositorio.crear(nombre, precio, categoria_id, stock_inicial)
 
     # Método para obtener todos los productos activos
     # Devuelve una lista de objetos Producto

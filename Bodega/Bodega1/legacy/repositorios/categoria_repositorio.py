@@ -6,6 +6,14 @@ class CategoriaRepositorio:
         self.conexion = conexion
 
     def crear(self, nombre):
+        nombre_limpio = nombre.strip()
+        if not nombre_limpio or len(nombre_limpio) < 2:
+            raise ValueError("El nombre debe contener al menos 2 caracteres")
+        
+        if nombre_limpio.isdigit():
+            raise ValueError("El nombre no puede contener solo numeros ")
+        if not any(c.isalpha() for c in nombre_limpio):
+            raise ValueError("El nombre debe contener al menos 2 letras ")
         cursor = self.conexion.conexion.cursor()
         cursor.execute("INSERT INTO Categoria (nombre) OUTPUT INSERTED.id VALUES (?)", (nombre,))
         nuevo_id = cursor.fetchone()[0]
